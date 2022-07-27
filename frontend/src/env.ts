@@ -1,0 +1,1 @@
+export const server: string = "https://www.dnd5eapi.co/api/";
