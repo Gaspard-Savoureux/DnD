@@ -1,0 +1,33 @@
+type Ability_bonuses {
+  bonus: Int,
+  ability_score: General
+}
+
+type General {
+  index: String,
+  name: String,
+  url: String,
+}
+
+type Race {
+  index: String,
+  name: String,
+  url: String,
+  speed: Int,
+  ability_bonuses: [Ability_bonuses],
+  alignment: String,
+  age: String,
+  size: String,
+  size_description: String,
+  starting_proficiencies: [General],
+  #starting_proficiency_options: Starting_proficiency_options,
+  languages: [General],
+  language_desc: String,
+  traits: [General],
+  subraces: [General],
+}
+
+type Query {
+  race(_id: String!): Race,
+  races: [Race],
+}

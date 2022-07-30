@@ -10,6 +10,7 @@
       "esnext.asynciterable"
     ]
   },
+  "include": ["src/**/*.d.ts", "src/**/*.ts", "src /**/*.graphql" ],
   "exclude": [
     "node_modules"
   ]
