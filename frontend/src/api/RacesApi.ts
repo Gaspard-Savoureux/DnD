@@ -1,6 +1,4 @@
 import { server } from "../env";
-import axios from 'axios';
-import type { Race } from '../types/Race';
 
 export interface results {
  index: string,
@@ -9,22 +7,9 @@ export interface results {
 }
 
 export const get = async () => {
-  // let Races= [] as results[];
-  // const options = {
-	// 	method: 'GET',
-	// 	url: `${server}/races`,
-	// };
   const response = fetch(`${server}/races`);
   const data = (await response).json()
   return data;
-  // axios.request(options).then(async (response) => {
-  //   const data: any = await response.data;
-  //   Races = await data.json();
-  //   console.log(Races);
-  // }).catch(function (error) {
-  //   console.error(error);
-  // });
-  // return Races;
 }
 
 // export const getDetails = async (): Promise<Race[]> => {
