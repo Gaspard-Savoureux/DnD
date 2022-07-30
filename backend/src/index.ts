@@ -1,14 +1,73 @@
-import { WebSocketServer } from 'ws'; // yarn add ws
-// import ws from 'ws'; yarn add ws@7
-// const WebSocketServer = ws.Server;
-import { useServer } from 'graphql-ws/lib/use/ws';
-import { schema } from './graphql/schema/mainSchema';
+import { createServer, createPubSub } from '@graphql-yoga/node';
+import { GraphQLObjectType, GraphQLID, GraphQLString } from 'graphql';
+const os = require('os');
 
-const server = new WebSocketServer({
-  port: 4000,
-  path: '/graphql',
-});
+const pubSub = createPubSub()
+// LE TRUC DE RANDOM NUMBER EST ACTUALLY VRAIMENT GOOD COMME EXEMPLE
+const server = createServer({
+  schema: {
+    typeDefs: /* GraphQL */ `
+      type Query {
+        hello: String
+      }
 
-useServer({ schema }, server);
+      type Specs {
+        cpu: Int!,
+        memory: Int!,
+      }
 
-console.log('Listening to port 4000');
+      type Subscription {
+        countdown(from: Int!): Int!,
+        specs: Specs,
+        randomNumber: Float!
+      }
+
+      type Mutation {
+        broadcastRandomNumber: Boolean,
+        broadcastSpecs: Boolean
+      }
+
+    `,
+    resolvers: {
+      Query: {
+        hello: () => 'world',
+      },
+      Subscription: {
+        countdown: {
+          // This will return the value on every 1 sec until it reaches 0
+          subscribe: async function* (_, { from }) {
+            for (let i = from; i >= 0; i--) {
+              await new Promise((resolve) => setTimeout(resolve, 1000))
+              yield { countdown: i }
+            }
+          },
+        },
+        specs: {
+          // subscribe to the specs event
+          subscribe: () => pubSub.subscribe('specs'),
+          resolve: (payload) => payload,
+        },
+        randomNumber: {
+          // subscribe to the randomNumber event
+          subscribe: () => pubSub.subscribe('randomNumber'),
+          resolve: (payload) => payload,
+        },
+      },
+      Mutation: {
+        broadcastRandomNumber: (_, args) => {
+          // publish a random number
+          pubSub.publish('randomNumber', Math.random())
+        },
+        broadcastSpecs: (_, args) => {
+          // publish a random number
+          const cpu = os.cpus()[0].speed;
+          const memory = os.freemem();
+          console.log(cpu, memory)
+          pubSub.publish('specs', {cpu, memory})
+        },
+      },
+    },
+  },
+})
+
+server.start()
